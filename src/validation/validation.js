@@ -23,9 +23,25 @@ export const userSchema = z.object({
 
   email: z.email('Invalid email format').max(128, 'Email must be at most 128 characters'),
 
-  password: passwordSchema,
+  password: z.string().min(1, 'Password is required'),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
+});
+
+// Register Payload
+export const registerSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, 'First name cannot be empty')
+    .max(50, 'First name must be at most 50 characters'),
+
+  lastName: z
+    .string()
+    .min(1, 'Last name cannot be empty')
+    .max(50, 'Last name must be at most 50 characters'),
+
+  email: z.email('Invalid email format').max(128, 'Email must be at most 128 characters'),
+  password: passwordSchema,
 });
 
 // Token blacklist schema
