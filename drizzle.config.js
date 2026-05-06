@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 import { DATABASE_URL } from './src/config/config.js';
+
+console.log(DATABASE_URL);
 export default defineConfig({
   out: './drizzle',
   schema: './src/database/schema.js',
