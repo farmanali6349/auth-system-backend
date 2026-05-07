@@ -1,4 +1,4 @@
-import { ApiError } from './ApiError.util';
+import { ApiError } from './ApiError.util.js';
 
 export const validateSchema = (schema, data, errorMessage = 'Invalid Data') => {
   const result = schema.safeParse(data);
