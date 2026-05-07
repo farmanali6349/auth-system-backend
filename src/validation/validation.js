@@ -4,9 +4,10 @@ import { z } from 'zod';
 export const passwordSchema = z
   .string()
   .min(6, 'Password must be at least 6 characters long')
+  .max(16, 'Password must be at most 16 characters long')
   .regex(
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-    'Password must contain at least one letter, one number, and one special character',
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/,
+    'Password must contain at least one uppercase, one lowercase, one number, and one special character',
   );
 
 // User schema
@@ -40,6 +41,11 @@ export const registerSchema = z.object({
     .min(1, 'Last name cannot be empty')
     .max(50, 'Last name must be at most 50 characters'),
 
+  email: z.email('Invalid email format').max(128, 'Email must be at most 128 characters'),
+  password: passwordSchema,
+});
+// Login Payload
+export const loginSchema = z.object({
   email: z.email('Invalid email format').max(128, 'Email must be at most 128 characters'),
   password: passwordSchema,
 });

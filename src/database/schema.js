@@ -1,6 +1,5 @@
 import { pgTable, timestamp, varchar, integer, text, index } from 'drizzle-orm/pg-core';
 
-console.log('Here we are');
 export const users = pgTable(
   'users',
   {
@@ -17,7 +16,6 @@ export const users = pgTable(
   }),
 );
 
-console.log('User table is clear');
 export const tokenBlacklist = pgTable(
   'token_blacklist',
   {
@@ -30,5 +28,3 @@ export const tokenBlacklist = pgTable(
     tokenCreatedAtIdx: index('token_created_at_idx').on(self.token, self.createdAt),
   }),
 );
-
-console.log('Token Table is also clear');

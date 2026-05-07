@@ -4,9 +4,11 @@ import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/config.js';
 import { ApiError } from './ApiError.util.js';
 
 // TOKEN RELATED FUNCTIONS
-export const generateAuthToken = jwt.sign(data, JWT_SECRET, {
-  expiresIn: JWT_EXPIRES_IN || '1d',
-});
+export const generateAuthToken = (data) => {
+  return jwt.sign(data, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN || '1d',
+  });
+};
 
 export const decodeToken = (token) => {
   try {
