@@ -4,12 +4,28 @@ import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/config.js';
 import { ApiError } from './ApiError.util.js';
 
 // TOKEN RELATED FUNCTIONS
+// Auth Token
 export const generateAuthToken = (data) => {
   return jwt.sign(data, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN || '1d',
   });
 };
 
+// Access Token
+export const generateAccessToken = (data) => {
+  return jwt.sign(data, JWT_SECRET, {
+    expiresIn: '15m',
+  });
+};
+
+// Refresh Token
+export const generateRefreshToken = (data) => {
+  return jwt.sign(data, JWT_SECRET, {
+    expiresIn: '7d',
+  });
+};
+
+// Decode The Token
 export const decodeToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);

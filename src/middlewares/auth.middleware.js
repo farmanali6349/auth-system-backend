@@ -39,3 +39,5 @@ export const authUser = asyncHandler(async (req, res, next) => {
   req.authToken = token;
   next();
 });
+
+// export const authenticate;

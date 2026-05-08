@@ -1,11 +1,18 @@
 import { validateSchema } from '../utils/validateSchema.util.js';
 import { findUserByEmail, insertUser } from '../services/user.service.js';
-import { generateAuthToken, generateHash, validatePassword } from '../utils/auth.util.js';
+import {
+  generateAccessToken,
+  generateAuthToken,
+  generateHash,
+  generateRefreshToken,
+  validatePassword,
+} from '../utils/auth.util.js';
 import { ApiResponse } from '../utils/ApiResponse.util.js';
 import { asyncHandler } from '../utils/asyncHandler.util.js';
 import { registerSchema, loginSchema } from '../validation/validation.js';
 import { IS_DEV } from '../config/config.js';
 import { ApiError } from '../utils/ApiError.util.js';
+
 export const registerUser = asyncHandler(async (req, res) => {
   // Validate the payload (firstName, lastName, email & password)
   const registerPayload = validateSchema(
@@ -42,11 +49,13 @@ export const loginUser = asyncHandler(async (req, res) => {
       throw unAuthError;
     }
 
-    const authToken = generateAuthToken({ id: user.id, email: user.email });
-    res.cookie('authToken', authToken, {
+    const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
+
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: !IS_DEV,
       secure: !IS_DEV,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days Expiry
       ...(!IS_DEV ? { sameSite: strict } : {}),
     });
 
@@ -54,7 +63,7 @@ export const loginUser = asyncHandler(async (req, res) => {
       new ApiResponse(200, 'LoggedIn Successfully', {
         ...user,
         password: null,
-        authToken,
+        accessToken,
       }).toJSON(),
     );
   } catch (error) {
