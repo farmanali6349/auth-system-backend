@@ -81,3 +81,8 @@ export const userProfile = asyncHandler((req, res) => {
     .status(200)
     .json(new ApiResponse(200, 'Profile retrieved successfully', req.user).toJSON());
 });
+
+export const logout = asyncHandler((req, res) => {
+  res.clearCookie('refreshToken');
+  return res.status(200).json({ message: 'Logged out successfully' });
+});

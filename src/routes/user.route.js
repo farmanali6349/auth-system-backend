@@ -1,6 +1,6 @@
 import express from 'express';
-import { loginUser, registerUser, userProfile } from '../controllers/user.controller.js';
-import { authUser } from '../middlewares/auth.middleware.js';
+import { loginUser, logout, registerUser, userProfile } from '../controllers/user.controller.js';
+import { authenticateToken, authUser } from '../middlewares/auth.middleware.js';
 
 export const userRouter = express.Router();
 
@@ -13,4 +13,5 @@ userRouter.get('/users', (req, res) => {
 
 userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
-userRouter.post('/profile', authUser, userProfile);
+userRouter.post('/logout', logout);
+userRouter.post('/profile', authenticateToken, userProfile);

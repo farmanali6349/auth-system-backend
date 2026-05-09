@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/config.js';
+import { JWT_SECRET, JWT_EXPIRES_IN, IS_DEV } from '../config/config.js';
 import { ApiError } from './ApiError.util.js';
 
 // TOKEN RELATED FUNCTIONS
@@ -13,16 +13,28 @@ export const generateAuthToken = (data) => {
 
 // Access Token
 export const generateAccessToken = (data) => {
-  return jwt.sign(data, JWT_SECRET, {
-    expiresIn: '15m',
-  });
+  try {
+    return jwt.sign(data, JWT_SECRET, {
+      expiresIn: '15m',
+    });
+  } catch (err) {
+    if (IS_DEV) {
+      console.log('Error in generating the access token :: ', err);
+    }
+  }
 };
 
 // Refresh Token
 export const generateRefreshToken = (data) => {
-  return jwt.sign(data, JWT_SECRET, {
-    expiresIn: '7d',
-  });
+  try {
+    return jwt.sign(data, JWT_SECRET, {
+      expiresIn: '7d',
+    });
+  } catch (error) {
+    if (IS_DEV) {
+      console.log('Error in generating the refresh token :: ', err);
+    }
+  }
 };
 
 // Decode The Token

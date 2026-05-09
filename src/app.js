@@ -8,7 +8,10 @@ import { errorHander } from './middlewares/error.middleware.js';
 import { asyncHandler } from './utils/asyncHandler.util.js';
 import { ApiResponse } from './utils/ApiResponse.util.js';
 import { accessLogStream } from './utils/accessLogStream.util.js';
+
+// ROUTERS
 import { userRouter } from './routes/user.route.js';
+import { authRotuer } from './routes/auth.route.js';
 export const app = express();
 
 // MIDDLEWARES
@@ -33,6 +36,8 @@ app.get(
 
 // User Route
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/auth', authRotuer);
+
 // 404 Handler
 app.use(notFound);
 
