@@ -40,4 +40,22 @@ export const authUser = asyncHandler(async (req, res, next) => {
   next();
 });
 
-// export const authenticate;
+export const authenticateToken = asyncHandler(async (req, res, next) => {
+  // Checking access token in the header
+  const accessToken = req?.headers?.authorization?.split(' ')[1];
+  const authError = ApiError.unAuthorized('Unauthorized: Invalid or Expired Token');
+
+  if (!accessToken) {
+    throw authError;
+  }
+
+  const decodedData = decodeToken(accessToken);
+  const userId = decodedData?.id ?? Number.parseInt(decodedData?.id) ?? undefined;
+  if (!userId || Number.isNaN(userId)) {
+    throw authError;
+  }
+
+  req.user = decodedData;
+
+  next();
+});
