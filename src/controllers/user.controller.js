@@ -12,6 +12,8 @@ import { asyncHandler } from '../utils/asyncHandler.util.js';
 import { registerSchema, loginSchema } from '../validation/validation.js';
 import { IS_DEV } from '../config/config.js';
 import { ApiError } from '../utils/ApiError.util.js';
+import { createSession } from '../services/session.service.js';
+import { revokeSessionByToken } from '../services/session.service.js';
 
 export const registerUser = asyncHandler(async (req, res) => {
   // Validate the payload (firstName, lastName, email & password)
@@ -50,7 +52,15 @@ export const loginUser = asyncHandler(async (req, res) => {
     }
 
     const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
-    const accessToken = generateAccessToken({ id: user.id, email: user.email });
+
+    // Create The Session Here
+    const session = await createSession(user?.id, refreshToken, req?.ip, req.headers['user-agent']);
+
+    const accessToken = generateAccessToken({
+      sessionId: session.id,
+      id: user.id,
+      email: user.email,
+    });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: !IS_DEV,
@@ -82,7 +92,14 @@ export const userProfile = asyncHandler((req, res) => {
     .json(new ApiResponse(200, 'Profile retrieved successfully', req.user).toJSON());
 });
 
-export const logout = asyncHandler((req, res) => {
+export const logout = asyncHandler(async (req, res) => {
+  const refreshToken = req?.cookies?.refreshToken;
+
+  if (!refreshToken) {
+    return ApiError.unAuthorized('Unauthorized: Invalid or expired token');
+  }
+
+  const revokedSession = await revokeSessionByToken(refreshToken);
   res.clearCookie('refreshToken');
   return res.status(200).json({ message: 'Logged out successfully' });
 });
