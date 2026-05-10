@@ -55,3 +55,14 @@ export const tokenBlacklistSchema = z.object({
   token: z.string().min(1, 'Token cannot be empty'),
   createdAt: z.date().optional(),
 });
+
+// Session Validation
+export const sessionSchema = z.object({
+  userId: z.number().positive(),
+  refreshToken: z.string().min(1, 'Refresh Token Hash Is Required'),
+  ip: z.string().min(1, 'IP address Is Required'),
+  userAgent: z.string().optional(),
+  revoked: z.boolean().default(false),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});

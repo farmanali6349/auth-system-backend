@@ -1,4 +1,4 @@
-import { pgTable, timestamp, varchar, integer, text, index } from 'drizzle-orm/pg-core';
+import { pgTable, timestamp, varchar, integer, text, index, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable(
   'users',
@@ -26,5 +26,22 @@ export const tokenBlacklist = pgTable(
   (self) => ({
     tokenIdx: index('token_idx').on(self.token),
     tokenCreatedAtIdx: index('token_created_at_idx').on(self.token, self.createdAt),
+  }),
+);
+
+export const sessions = pgTable(
+  'sessions',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer('user_id').notNull(),
+    refreshToken: text('refresh_token').notNull(),
+    ip: text('ip').notNull(),
+    userAgent: text('user_agent'),
+    revoked: boolean('revoked').default(false).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (self) => ({
+    refreshTokenIdx: index('refresh_token_idx').on(self.refreshToken),
   }),
 );
