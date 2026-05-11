@@ -1,9 +1,9 @@
 import { ApiError } from '../utils/ApiError.util.js';
 import { validateSchema } from '../utils/validateSchema.util.js';
-import { userSchema } from '../validation/validation.js';
+import { otpVerificationSchema, userSchema } from '../validation/validation.js';
 import { db } from '../database/db.js';
-import { users } from '../database/schema.js';
-import { eq } from 'drizzle-orm';
+import { otpVerification, users } from '../database/schema.js';
+import { and, eq, gt } from 'drizzle-orm';
 import { IS_DEV } from '../config/config.js';
 export const insertUser = async (data) => {
   try {
@@ -80,5 +80,59 @@ export const findUserById = async (userId) => {
       console.log('Error occured finding user with Id : ', error);
     }
     throw ApiError.notFound('User not exists');
+  }
+};
+
+export const generateOtp = async (email) => {
+  try {
+    const otpNumber = Math.floor(1000 + Math.random() * 9000);
+
+    const otpPayload = validateSchema(otpVerificationSchema, {
+      email,
+      otp: otpNumber,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    const result = await db.insert(otpVerification).values(otpPayload).returning();
+    const otp = Array.isArray(result) ? result[0] : result;
+    return otp;
+  } catch (error) {
+    if (IS_DEV) {
+      console.log('Error in OTP Generation', error);
+    }
+    throw ApiError.internalServerError('OTP Generation Failed', error);
+  }
+};
+
+export const verifyOtp = async (email, otp) => {
+  try {
+    const result = await db
+      .select()
+      .from(otpVerification)
+      .where(
+        and(
+          eq(otpVerification.email, email),
+          eq(otpVerification.otp, otp),
+          gt(otpVerification.expiresAt, new Date()),
+        ),
+      );
+
+    if (!result.length > 0) {
+      return false;
+    }
+
+    // If OTP is verified, now make user also verified
+    await db
+      .update(users)
+      .set({
+        isVerified: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.email, email));
+
+    return true;
+  } catch (error) {
+    if (IS_DEV) console.log('Error in OTP verification :: ', error);
+    throw ApiError.badRequest('Error in OTP verification', error);
   }
 };

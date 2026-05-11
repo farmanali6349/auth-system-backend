@@ -1,5 +1,12 @@
 import express from 'express';
-import { loginUser, logout, registerUser, userProfile } from '../controllers/user.controller.js';
+import {
+  loginUser,
+  logout,
+  registerUser,
+  userProfile,
+  generateOtpPassword,
+  verifyOtpPassword,
+} from '../controllers/user.controller.js';
 import { authenticateToken, authUser } from '../middlewares/auth.middleware.js';
 
 export const userRouter = express.Router();
@@ -15,3 +22,5 @@ userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
 userRouter.post('/logout', logout);
 userRouter.post('/profile', authenticateToken, userProfile);
+userRouter.post('/generate-otp', authenticateToken, generateOtpPassword);
+userRouter.post('/verify-otp', authenticateToken, verifyOtpPassword);
