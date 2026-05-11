@@ -1,5 +1,5 @@
 import { validateSchema } from '../utils/validateSchema.util.js';
-import { findUserByEmail, insertUser } from '../services/user.service.js';
+import { findUserByEmail, generateOtp, insertUser, verifyOtp } from '../services/user.service.js';
 import {
   generateAccessToken,
   generateAuthToken,
@@ -14,6 +14,7 @@ import { IS_DEV } from '../config/config.js';
 import { ApiError } from '../utils/ApiError.util.js';
 import { createSession } from '../services/session.service.js';
 import { revokeSessionByToken } from '../services/session.service.js';
+import { sendOtp } from '../utils/sendOtp.util.js';
 
 export const registerUser = asyncHandler(async (req, res) => {
   // Validate the payload (firstName, lastName, email & password)
@@ -102,4 +103,51 @@ export const logout = asyncHandler(async (req, res) => {
   const revokedSession = await revokeSessionByToken(refreshToken);
   res.clearCookie('refreshToken');
   return res.status(200).json({ message: 'Logged out successfully' });
+});
+
+// Generate Otp Password
+export const generateOtpPassword = asyncHandler(async (req, res) => {
+  const user = req?.user;
+
+  if (!user) {
+    throw ApiError.unAuthorized('Unauthorized: Expired or Invalid Token');
+  }
+
+  const otp = await generateOtp(user.email);
+
+  // Send OTP
+  await sendOtp(user.email, otp?.otp);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        'OTP Password generated and will expire in 10 mins, please verify',
+      ).toJSON(),
+    );
+});
+
+export const verifyOtpPassword = asyncHandler(async (req, res) => {
+  const user = req?.user;
+
+  if (!user) {
+    throw ApiError.unAuthorized('Unauthorized: Expired or Invalid Token');
+  }
+
+  const otp = Number.parseInt(req?.body?.otp);
+
+  if (!otp || !(typeof otp === 'number') || Number.isNaN(otp)) {
+    throw ApiError.badRequest('Empty or invalid OTP');
+  }
+
+  const isVerified = await verifyOtp(user?.email, otp);
+
+  if (!isVerified) {
+    throw ApiError.badRequest('Wrong or Expired OTP, Please try again');
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, 'OTP verification successfull', { email: user?.email, otp }));
 });
