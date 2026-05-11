@@ -66,3 +66,23 @@ export const sessionSchema = z.object({
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
+
+export const otpVerificationSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required', invalid_type_error: 'Email must be a string' })
+    .email('Invalid email format')
+    .max(128, 'Email must be at most 128 characters'),
+
+  otp: z
+    .number({ required_error: 'OTP is required', invalid_type_error: 'OTP must be a number' })
+    .int('OTP must be an integer')
+    .min(1000, 'OTP must be a 4-digit number')
+    .max(9999, 'OTP must be a 4-digit number'),
+
+  createdAt: z.date().optional(),
+
+  expiresAt: z.date({
+    required_error: 'ExpiresAt is required',
+    invalid_type_error: 'ExpiresAt must be a valid date',
+  }),
+});

@@ -8,6 +8,7 @@ export const users = pgTable(
     lastName: varchar('last_name', { length: 50 }).notNull(),
     email: varchar('email', { length: 128 }).unique().notNull(),
     password: text('password').notNull(),
+    isVerified: boolean('is_verified').default(false),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -45,3 +46,11 @@ export const sessions = pgTable(
     refreshTokenIdx: index('refresh_token_idx').on(self.refreshToken),
   }),
 );
+
+export const otpVerification = pgTable('otp_verification', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  email: varchar('email', { length: 128 }).notNull(),
+  otp: integer('otp').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+});
